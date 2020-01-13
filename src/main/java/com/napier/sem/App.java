@@ -1,41 +1,46 @@
 package com.napier.sem;
-
-
 import java.sql.*;
 
 public class App {
 
-    private Connection connection = null;
+    private Connection connection = null;  // Initialise connection parameter
 
     public static void main(String[] args) {
-        App app = new App();
-        app.connect();
-        Employee emp = app.getEmployee(255530);
+        App app = new App(); // Create a new app instance
+        app.connect(); // Call the connect method to connect to the MySQL DB
+        Employee emp = app.getEmployee(255534); // Get the employee ID
+
         app.displayEmployee(emp);
         app.disconnect();
     }
 
     private void connect() {
         try {
+
             Class.forName("com.mysql.jdbc.Driver");
         } catch (ClassNotFoundException e) {
+
             System.out.println("Could not load  driver");
             System.exit(-1);
         }
 
         int retries = 10;
-        for (int i = 0; i < retries; ++i) {
+
+        for (int i = 0; i < retries; ++i) { // Loop over
+
             System.out.println("Connecting to database...");
             try {
                 // Wait a bit for db to start
-                Thread.sleep(30000);
+                Thread.sleep(30000); // Sleep for some time
                 // Connect to database
                 connection = DriverManager.getConnection("jdbc:mysql://db:3306/employees?useSSL=false", "root", "example");
                 System.out.println("Successfully connected");
                 break;
+
             } catch (SQLException sqle) {
                 System.out.println("Failed to connect to database attempt " + i);
                 System.out.println(sqle.getMessage());
+
             } catch (InterruptedException ie) {
                 System.out.println("Thread interrupted? Should not happen.");
             }
@@ -53,7 +58,7 @@ public class App {
         }
     }
 
-    public Employee getEmployee(int ID) {
+    public Employee getEmployee(int ID) { // Method to get the specific employee
         try {
             // Create an SQL statement
             Statement stmt = connection.createStatement();
@@ -63,17 +68,22 @@ public class App {
                             + "FROM employees "
                             + "WHERE emp_no = " + ID;
             // Execute SQL statement
-            ResultSet rset = stmt.executeQuery(strSelect);
+            ResultSet rset = stmt.executeQuery(strSelect); // Execute the query by creating a result set
             // Return new employee if valid.
             // Check one is returned
             if (rset.next()) {
-                Employee emp = new Employee();
+
+                Employee emp = new Employee(); // Create instance of employee
                 emp.emp_no = rset.getInt("emp_no");
                 emp.first_name = rset.getString("first_name");
+
                 emp.last_name = rset.getString("last_name");
-                return emp;
+                return emp;  // Return the employee
+
             } else
+
                 return null;
+
         } catch (Exception e) {
             System.out.println(e.getMessage());
             System.out.println("Failed to get employee details");
@@ -81,9 +91,11 @@ public class App {
         }
     }
 
-    public void displayEmployee(Employee emp) {
+    public void displayEmployee(Employee emp) { // Display the employee data
         if (emp != null) {
+
             System.out.println(
+
                     emp.emp_no + " "
                             + emp.first_name + " "
                             + emp.last_name + "\n"
