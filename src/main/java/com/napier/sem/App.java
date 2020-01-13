@@ -9,9 +9,11 @@ public class App {
     public static void main(String[] args) {
         App app = new App(); // Create a new app instance
         app.connect(); // Call the connect method to connect to the MySQL DB
+
         ArrayList<Employee> employees = app.getSalaries();
         System.out.println(employees.size());
 
+        app.printSalaries(employees);
         app.disconnect();
     }
 
@@ -92,52 +94,48 @@ public class App {
         }
     }
 
-    public void displayEmployee(Employee emp) { // Display the employee data
-        if (emp != null) {
-
-            System.out.println(
-
-                    emp.emp_no + " "
-                            + emp.first_name + " "
-                            + emp.last_name + "\n"
-                            + emp.title + "\n"
-                            + "Salary:" + emp.salary + "\n"
-                            + emp.dept_name + "\n"
-                            + "Manager: " + emp.manager + "\n");
-        }
-    }
-
     public ArrayList<Employee> getSalaries() { // Routine to get the salaries of employees
+        boolean isAdded = false;
         try {
-            Statement statement = connection.createStatement();
+            Statement statement = connection.createStatement(); // Create the SQL statement
 
             String selectQuery =
-                    "SELECT employees.emp_no, employees.first_name, employees.last_name, salaries.salary"
-                            + "FROM employees, salary "
+                    "SELECT employees.emp_no, employees.first_name, employees.last_name, salaries.salary "
+                            + "FROM employees, salaries "
                             + "WHERE employees.emp_no = salaries.emp_no AND salaries.to_date = '9999-01-01' "
-                            + "ORDER BY employees.emp_no ASC";
+                            + "ORDER BY employees.emp_no ASC"; // SQL Query to retrieve the salaries
 
-            ResultSet set = statement.executeQuery(selectQuery);
-
+            ResultSet set = statement.executeQuery(selectQuery); // Execute the query
             ArrayList<Employee> employeesList = new ArrayList<Employee>();
 
-            while (set.next()) {
+            while (set.next()) {  // Loop over the result set
                 Employee employee = new Employee();
                 employee.emp_no = set.getInt("employees.emp_no");
                 employee.first_name = set.getString("employees.first_name");
                 employee.last_name = set.getString("employees.last_name");
-            
+
                 employee.salary = set.getInt("salaries.salary");
 
                 employeesList.add(employee);
+                isAdded = true;
             }
-
             return employeesList;
         } catch (Exception e) {
             System.out.println(e.getMessage());
             System.out.println("Failed to get salary details");
+            return null;
         }
+    }
 
-        return null;
+    public void printSalaries(ArrayList<Employee> employees) { // Routine that prints the salaries of the Employees
+        System.out.println(String.format("%-10s %-15s %-20s %-8s", "Emp No", "First Name", "Last Name", "Salary"));
+
+        for (Employee emp : employees) { // Loop over the array list
+
+            String employee_string =
+                    String.format("%-10s %-15s %-20s %-8s",
+                            emp.emp_no, emp.first_name, emp.last_name, emp.salary);
+            System.out.println(employee_string);
+        }
     }
 }
