@@ -1,9 +1,7 @@
 package com.napier.sem;
 
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class App {
 
@@ -12,6 +10,8 @@ public class App {
     public static void main(String[] args) {
         App app = new App();
         app.connect();
+        Employee emp = app.getEmployee(255530);
+        app.displayEmployee(emp);
         app.disconnect();
     }
 
@@ -50,6 +50,40 @@ public class App {
             } catch (Exception e) {
                 System.out.println("Error closing connection to database");
             }
+        }
+    }
+
+    public Employee getEmployee(int ID) {
+        try {
+            Statement statement = connection.createStatement();
+
+            String selectString = "SELECT  emp_no, first_name," +
+                    "last_name" + "FROM employees"
+                    + "WHERE emp_no = " + ID;
+
+            ResultSet set = statement.executeQuery(selectString);
+
+            if (set.next()) {
+                Employee emp = new Employee();
+                emp.emp_no = set.getInt("emp_no");
+                emp.first_name = set.getString("first_name");
+                emp.last_name = set.getString("last_name");
+
+                return emp;
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            System.out.println("Failed to get employee details");
+            return null;
+        }
+    }
+
+    public void displayEmployee(Employee emp) {
+        if (emp != null) {
+            System.out.println(emp.emp_no + " "
+                    + emp.first_name);
         }
     }
 }
