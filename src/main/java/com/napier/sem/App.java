@@ -1,5 +1,6 @@
 package com.napier.sem;
 import java.sql.*;
+import java.util.ArrayList;
 
 public class App {
 
@@ -8,9 +9,9 @@ public class App {
     public static void main(String[] args) {
         App app = new App(); // Create a new app instance
         app.connect(); // Call the connect method to connect to the MySQL DB
-        Employee emp = app.getEmployee(255534); // Get the employee ID
+        ArrayList<Employee> employees = app.getSalaries();
+        System.out.println(employees.size());
 
-        app.displayEmployee(emp);
         app.disconnect();
     }
 
@@ -104,5 +105,39 @@ public class App {
                             + emp.dept_name + "\n"
                             + "Manager: " + emp.manager + "\n");
         }
+    }
+
+    public ArrayList<Employee> getSalaries() { // Routine to get the salaries of employees
+        try {
+            Statement statement = connection.createStatement();
+
+            String selectQuery =
+                    "SELECT employees.emp_no, employees.first_name, employees.last_name, salaries.salary"
+                            + "FROM employees, salary "
+                            + "WHERE employees.emp_no = salaries.emp_no AND salaries.to_date = '9999-01-01' "
+                            + "ORDER BY employees.emp_no ASC";
+
+            ResultSet set = statement.executeQuery(selectQuery);
+
+            ArrayList<Employee> employeesList = new ArrayList<Employee>();
+
+            while (set.next()) {
+                Employee employee = new Employee();
+                employee.emp_no = set.getInt("employees.emp_no");
+                employee.first_name = set.getString("employees.first_name");
+                employee.last_name = set.getString("employees.last_name");
+            
+                employee.salary = set.getInt("salaries.salary");
+
+                employeesList.add(employee);
+            }
+
+            return employeesList;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            System.out.println("Failed to get salary details");
+        }
+
+        return null;
     }
 }
